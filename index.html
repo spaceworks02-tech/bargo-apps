@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BARGO LAB — 모바일 게임 & 앱 허브</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Grotesk:wght@300;400;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #120D0A;
+      --ember: #FF7A29;
+      --ember-dim: rgba(255, 122, 41, 0.08);
+      --ember-mid: rgba(255, 122, 41, 0.45);
+      --white: #F5EFE6;
+      --gray: #4A4038;
+      --gray-light: #9C9086;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--white); font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; cursor: none; }
+
+    #cursor { position: fixed; width: 10px; height: 10px; background: var(--ember); border-radius: 50%; pointer-events: none; z-index: 9997; transform: translate(-50%, -50%); transition: transform 0.1s ease; mix-blend-mode: difference; }
+    #cursor-ring { position: fixed; width: 36px; height: 36px; border: 1px solid var(--ember-mid); border-radius: 50%; pointer-events: none; z-index: 9996; transform: translate(-50%, -50%); transition: all 0.18s ease; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 20px 48px; background: rgba(18,13,10,0.95); border-bottom: 1px solid var(--gray); backdrop-filter: blur(12px); }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.05em; color: var(--gray-light); }
+    .nav-logo span { color: var(--ember); }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-cta { display: flex; align-items: center; gap: 8px; padding: 10px 18px; color: var(--gray-light); text-decoration: none; font-size: 13px; letter-spacing: 0.04em; border: none; transition: color 0.25s; }
+    .nav-cta:hover { color: var(--ember); }
+    .nav-cta.filled { border: 1px solid var(--gray); color: var(--white); }
+    .nav-cta.filled:hover { border-color: var(--ember); }
+
+    #hero { position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 48px 80px; overflow: hidden; }
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 25% 100%, rgba(255,122,41,0.14), transparent 55%), var(--black);
+      z-index: 0;
+    }
+    canvas#spark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.55; pointer-events: none; }
+    .hero-tag { position: relative; z-index: 1; font-size: 11px; letter-spacing: 0.2em; color: var(--ember); text-transform: uppercase; margin-bottom: 28px; font-family: 'Space Grotesk', sans-serif; }
+    .hero-title { position: relative; z-index: 1; font-size: clamp(44px, 7vw, 104px); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 36px; }
+    .hero-title em { font-style: normal; color: var(--ember); display: block; }
+    .hero-sub { position: relative; z-index: 1; font-size: clamp(15px, 1.5vw, 18px); color: var(--gray-light); font-weight: 300; max-width: 540px; line-height: 1.8; margin-bottom: 48px; }
+    .hero-actions { position: relative; z-index: 1; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .btn-primary { padding: 16px 40px; background: var(--ember); color: #17110c; font-weight: 700; font-size: 14px; letter-spacing: 0.03em; text-decoration: none; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-ghost { padding: 16px 32px; border: 1px solid var(--gray); color: var(--gray-light); font-size: 14px; text-decoration: none; letter-spacing: 0.03em; transition: all 0.2s; }
+    .btn-ghost:hover { border-color: var(--white); color: var(--white); }
+    .scroll-hint { position: absolute; bottom: 28px; right: 48px; z-index: 1; font-size: 11px; letter-spacing: 0.15em; color: var(--gray); text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; gap: 12px; }
+    .scroll-hint::before { content: ''; display: block; width: 40px; height: 1px; background: var(--gray); animation: scrollLine 2s ease infinite; }
+    @keyframes scrollLine { 0%, 100% { transform: scaleX(1); opacity: 0.5; } 50% { transform: scaleX(0.4); opacity: 1; } }
+
+    section { padding: 140px 48px; position: relative; }
+    .section-number { font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 0.2em; color: var(--ember); margin-bottom: 60px; }
+    .divider { width: 100%; height: 1px; background: var(--gray); }
+
+    #manifesto { background: var(--black); }
+    .manifesto-text { font-size: clamp(26px, 4vw, 52px); font-weight: 700; line-height: 1.35; letter-spacing: -0.01em; max-width: 920px; }
+    .manifesto-text .accent { color: var(--ember); }
+    .manifesto-note { margin-top: 40px; font-size: 14px; color: var(--gray-light); max-width: 560px; line-height: 1.9; }
+
+    .grid-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 80px; gap: 24px; flex-wrap: wrap; }
+    .grid-title { font-size: clamp(32px, 4vw, 52px); font-weight: 900; letter-spacing: -0.03em; }
+    .grid-desc { font-size: 14px; color: var(--gray-light); max-width: 280px; line-height: 1.8; text-align: right; }
+
+    #games { background: #0e0a08; }
+    #apps { background: #080605; }
+    .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .proj-card { border: 1px solid var(--gray); padding: 52px 44px; position: relative; overflow: hidden; transition: border-color 0.3s, background 0.3s; }
+    .proj-card:hover { border-color: var(--ember); background: var(--ember-dim); }
+    .proj-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; gap: 12px; }
+    .proj-badge { font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.16em; padding: 5px 12px; text-transform: uppercase; }
+    .proj-badge.live { color: #000; background: var(--ember); }
+    .proj-badge.beta { color: var(--ember); border: 1px solid var(--ember); background: transparent; }
+    .proj-type { font-family: 'Space Grotesk', sans-serif; font-size: 10px; letter-spacing: 0.14em; color: var(--gray-light); text-transform: uppercase; text-align: right; }
+    .proj-name { font-size: clamp(24px, 2.6vw, 32px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 6px; line-height: 1.2; }
+    .proj-name-sub { font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: var(--ember); letter-spacing: 0.08em; margin-bottom: 22px; }
+    .proj-desc { font-size: 14px; color: var(--gray-light); line-height: 1.9; margin-bottom: 28px; }
+    .proj-link { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--white); text-decoration: none; border-bottom: 1px solid var(--gray); padding-bottom: 4px; transition: border-color 0.2s, color 0.2s; }
+    .proj-link:hover { color: var(--ember); border-color: var(--ember); }
+    .proj-link.disabled { color: var(--gray-light); pointer-events: none; border-color: transparent; }
+    .proj-glyph { position: absolute; bottom: 28px; right: 36px; font-family: 'Space Grotesk', sans-serif; font-size: 72px; font-weight: 700; color: rgba(255,122,41,0.04); line-height: 1; transition: color 0.3s; user-select: none; }
+    .proj-card:hover .proj-glyph { color: rgba(255,122,41,0.09); }
+
+    #credits { background: var(--black); }
+    .credits-header { margin-bottom: 90px; }
+    .credits-title { font-size: clamp(30px, 4vw, 48px); font-weight: 900; letter-spacing: -0.02em; }
+    .credits-rows { display: flex; flex-direction: column; }
+    .credit-row { display: grid; grid-template-columns: 200px 1fr; gap: 48px; padding: 36px 0; border-top: 1px solid var(--gray); align-items: baseline; }
+    .credit-row:last-child { border-bottom: 1px solid var(--gray); }
+    .credit-role { font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 0.15em; color: var(--ember); text-transform: uppercase; }
+    .credit-names { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+    .credit-names span { color: var(--gray-light); font-weight: 300; font-size: 14px; }
+
+    footer { border-top: 1px solid var(--gray); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .footer-logo { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+    .footer-logo span { color: var(--ember); }
+    .footer-info { font-size: 12px; color: var(--gray-light); text-align: right; line-height: 1.8; }
+
+    #top-btn { position: fixed; bottom: 36px; right: 36px; width: 48px; height: 48px; background: var(--ember); color: #17110c; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 200; opacity: 0; transform: translateY(16px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; }
+    #top-btn.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #top-btn:hover { background: #fff; }
+
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    @media (max-width: 900px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .grid-header { flex-direction: column; align-items: flex-start; }
+      .grid-desc { text-align: left; max-width: 100%; }
+    }
+    @media (max-width: 768px) {
+      body { cursor: auto; }
+      #cursor, #cursor-ring { display: none; }
+      nav { padding: 18px 20px; }
+      .nav-links a:not(.filled) { display: none; }
+      #hero { padding: 0 24px 64px; }
+      section { padding: 80px 24px; }
+      .proj-card { padding: 36px 28px; }
+      .credit-row { grid-template-columns: 1fr; gap: 8px; }
+      footer { flex-direction: column; text-align: center; }
+      .footer-info { text-align: center; }
+      .scroll-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div id="top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+  <nav>
+    <div class="nav-logo">BARGO<span>_LAB</span></div>
+    <div class="nav-links">
+      <a href="#games" class="nav-cta">게임</a>
+      <a href="#apps" class="nav-cta">앱</a>
+      <a href="https://drama.bargo2023.co.kr" class="nav-cta filled">쿡캠 드라마 →</a>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <canvas id="spark"></canvas>
+    <div class="hero-tag">Bargo Lab · Mobile Games &amp; Apps</div>
+    <h1 class="hero-title">
+      우리가 만드는<br>
+      <em>게임과 앱들.</em>
+    </h1>
+    <p class="hero-sub">
+      팝업스토어에서 30초 만에 즐기는 캐치 게임부터, 말 한마디로 정리되는 농사 기록까지.
+      작지만 진짜인 모바일 경험들을 모았습니다.
+    </p>
+    <div class="hero-actions">
+      <a href="#games" class="btn-primary">게임 보기</a>
+      <a href="#apps" class="btn-ghost">앱 보기 →</a>
+    </div>
+    <div class="scroll-hint">scroll</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="manifesto">
+    <div class="section-number">00 — 만드는 이유</div>
+    <p class="manifesto-text reveal">
+      우리는 앱을 팔지 않습니다.<br>
+      사람들의 하루에 필요한 도구와 즐거움을,<br>
+      <span class="accent">작지만 진짜로 만듭니다.</span>
+    </p>
+    <p class="manifesto-note reveal reveal-delay-1">
+      캠핑장의 재미, 가야 건국설화의 이야기, 농촌의 일손 부족, 매일 밤 미뤄지는 영농일지 —
+      각자 다른 문제에서 출발했지만, 만드는 방식은 같습니다. 필요한 만큼만, 확실하게.
+    </p>
+  </section>
+
+  <!-- 게임 -->
+  <section id="games">
+    <div class="grid-header">
+      <h2 class="grid-title reveal">게임</h2>
+      <p class="grid-desc reveal reveal-delay-1">브랜드 체험과 페스티벌 현장을 위해 만든 가벼운 웹 게임들입니다.</p>
+    </div>
+    <div class="card-grid">
+      <div class="proj-card reveal">
+        <div class="proj-card-top">
+          <span class="proj-badge live">ONE 스토어</span>
+          <span class="proj-type">캐치 게임</span>
+        </div>
+        <div class="proj-name">허황옥의 뱃길</div>
+        <div class="proj-name-sub">가야로 가는 30초</div>
+        <p class="proj-desc">
+          가야 건국설화를 소재로 한 팝업스토어 체험 게임.
+          AR 포토부스와 명예의 전당까지, 30초 안에 가야로 떠나는 캐치 게임입니다.
+        </p>
+        <a href="https://m.onestore.co.kr/v2/ko-kr/app/0001007257" class="proj-link">원스토어에서 다운로드 →</a>
+        <div class="proj-glyph">01</div>
+      </div>
+      <div class="proj-card reveal reveal-delay-1">
+        <div class="proj-card-top">
+          <span class="proj-badge live">Play Now</span>
+          <span class="proj-type">챌린지 게임 · 브랜드 프로모션</span>
+        </div>
+        <div class="proj-name">그릴마스터 챌린지</div>
+        <div class="proj-name-sub">불의 향연 × 쿡캠</div>
+        <p class="proj-desc">
+          K-BBQ 페스티벌 「불의 향연」과 쿡캠이 함께 만든 홍보 게임.
+          숯불 앞에서 즐기는 짧고 경쾌한 챌린지로 축제 현장의 재미를 더합니다.
+        </p>
+        <a href="https://grillmaster.bargo2023.co.kr" class="proj-link">지금 플레이하기 →</a>
+        <div class="proj-glyph">02</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- 앱 -->
+  <section id="apps">
+    <div class="grid-header">
+      <h2 class="grid-title reveal">앱</h2>
+      <p class="grid-desc reveal reveal-delay-1">농업 현장의 실제 문제에서 출발한 실용 앱들입니다.</p>
+    </div>
+    <div class="card-grid">
+      <div class="proj-card reveal">
+        <div class="proj-card-top">
+          <span class="proj-badge live">ONE 스토어</span>
+          <span class="proj-type">음성 AI · 영농 기록</span>
+        </div>
+        <div class="proj-name">말로 쓰는 영농일지</div>
+        <div class="proj-name-sub">Voice-based Farming Diary</div>
+        <p class="proj-desc">
+          말하기만 하면 AI가 작업내용·구입자재·작물상태를 자동으로 정리해주는 영농일지.
+          지출 집계까지 한 번에, 스마트폰 화면 입력이 어려운 농업인을 위해 만들었습니다.
+        </p>
+        <a href="https://m.onestore.co.kr/v2/ko-kr/app/0001007108" class="proj-link">원스토어에서 다운로드 →</a>
+        <div class="proj-glyph">03</div>
+      </div>
+      <div class="proj-card reveal reveal-delay-1">
+        <div class="proj-card-top">
+          <span class="proj-badge beta">Beta</span>
+          <span class="proj-type">농촌 인력매칭 · Android</span>
+        </div>
+        <div class="proj-name">일손이음</div>
+        <div class="proj-name-sub">Farm Labor Matching</div>
+        <p class="proj-desc">
+          농번기 일손이 필요한 농장주와, 일을 찾는 근로자를 잇는 매칭 앱.
+          공고 등록부터 지원, 체크인, 평점까지 — 현재 베타 테스트 중입니다.
+        </p>
+        <a href="assets/ilsoneum.apk" class="proj-link" download>APK 다운로드 →</a>
+        <p style="font-size:11px; color:var(--gray-light); margin-top:12px; line-height:1.7;">
+          Android 전용 · 스토어 배포 전이라 설치 시 "출처를 알 수 없는 앱" 허용이 필요합니다.
+        </p>
+        <div class="proj-glyph">04</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section id="credits">
+    <div class="credits-header">
+      <div class="section-number">01 — 만든 곳</div>
+      <h2 class="credits-title reveal">Bargo</h2>
+    </div>
+    <div class="credits-rows">
+      <div class="credit-row reveal">
+        <div class="credit-role">게임 제작</div>
+        <div class="credit-names">주식회사 바르고 <span>— 대표 김선아</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">BARGO<span>_LAB</span></div>
+    <div class="footer-info">
+      게임과 앱 허브 · 바르고<br>
+      경상남도 김해시 관동로 14
+    </div>
+  </footer>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    });
+    (function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    })();
+    document.querySelectorAll('a, button, #top-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+        ring.style.transform = 'translate(-50%,-50%) scale(1.6)';
+        ring.style.borderColor = 'rgba(255,122,41,0.85)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+        ring.style.transform = 'translate(-50%,-50%) scale(1)';
+        ring.style.borderColor = 'rgba(255,122,41,0.45)';
+      });
+    });
+
+    const canvas = document.getElementById('spark');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resizeCanvas() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    const embers = Array.from({length: 50}, () => ({
+      x: Math.random(), y: 1 + Math.random() * 0.3,
+      speed: 0.0005 + Math.random() * 0.001,
+      drift: (Math.random() - 0.5) * 0.0005,
+      size: 1 + Math.random() * 2, phase: Math.random() * Math.PI * 2,
+    }));
+    function drawEmbers() {
+      ctx.clearRect(0, 0, W, H);
+      embers.forEach(e => {
+        e.y -= e.speed; e.x += e.drift;
+        if (e.y < -0.05) { e.y = 1 + Math.random() * 0.1; e.x = Math.random(); }
+        const flick = 0.5 + 0.5 * Math.sin(e.phase + e.y * 20);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, ${120 + Math.floor(flick*60)}, 40, ${0.2 + flick * 0.45})`;
+        ctx.arc(e.x * W, e.y * H, e.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(drawEmbers);
+    }
+    drawEmbers();
+
+    const topBtn = document.getElementById('top-btn');
+    window.addEventListener('scroll', () => { topBtn.classList.toggle('visible', window.scrollY > 400); });
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
