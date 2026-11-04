@@ -53,7 +53,18 @@
       background: radial-gradient(ellipse at 25% 100%, rgba(255,122,41,0.14), transparent 55%), var(--black);
       z-index: 0;
     }
-    canvas#spark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.55; pointer-events: none; }
+    #hero .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: url('assets/hero-bg.jpg') right center / cover no-repeat;
+      filter: saturate(0.95) brightness(0.8);
+    }
+    #hero .hero-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(18,13,10,0.97) 0%, rgba(18,13,10,0.85) 32%, rgba(18,13,10,0.35) 62%, rgba(18,13,10,0.2) 100%),
+        linear-gradient(180deg, rgba(18,13,10,0.55) 0%, rgba(18,13,10,0) 25%, rgba(18,13,10,0) 60%, rgba(18,13,10,0.95) 100%);
+    }
+    canvas#spark { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.55; pointer-events: none; z-index: 0; }
     .hero-tag { position: relative; z-index: 1; font-size: 11px; letter-spacing: 0.2em; color: var(--ember); text-transform: uppercase; margin-bottom: 28px; font-family: 'Space Grotesk', sans-serif; }
     .hero-title { position: relative; z-index: 1; font-size: clamp(44px, 7vw, 104px); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 36px; }
     .hero-title em { font-style: normal; color: var(--ember); display: block; }
@@ -161,6 +172,8 @@
       .footer-info { text-align: center; }
       .site-family { justify-content: center; }
       .scroll-hint { display: none; }
+      #hero .hero-bg { background-position: 72% center; }
+      #hero .hero-bg::after { background: linear-gradient(180deg, rgba(18,13,10,0.55) 0%, rgba(18,13,10,0.45) 35%, rgba(18,13,10,0.9) 62%, rgba(18,13,10,0.98) 100%); }
     }
   </style>
 </head>
@@ -181,6 +194,7 @@
   </nav>
 
   <section id="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
     <canvas id="spark"></canvas>
     <div class="hero-tag">Bargo Lab · Mobile Games &amp; Apps</div>
     <h1 class="hero-title">
